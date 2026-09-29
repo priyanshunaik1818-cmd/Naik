@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Raise a request — Naik</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172338;
+      --muted: #778399;
+      --line: #e7ebf2;
+      --paper: #fff;
+      --canvas: #f5f7fb;
+      --blue: #4263eb;
+      --blue-soft: #eef2ff;
+      --red: #c2414b;
+      --green: #18865b;
+      --green-soft: #eaf7f0;
+      --control-border: #dfe4ec;
+      --control-bg: #fff;
+      --muted-strong: #59667a;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; margin: 0; color: var(--ink); background: var(--canvas); }
+    button, input, select, textarea { font: inherit; }
+    .topbar { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(18px, 4vw, 54px); background: var(--paper); border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; font-size: 19px; font-weight: 750; letter-spacing: -.04em; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: #172338; color: white; font-size: 15px; }
+    .dashboard-link { color: var(--blue); font-size: 12px; font-weight: 700; text-decoration: none; }
+    .dashboard-link:hover { text-decoration: underline; }
+    main { width: min(760px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 60px; }
+    .eyebrow { margin-bottom: 9px; color: var(--blue); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); letter-spacing: -.05em; }
+    .subtitle { margin: 9px 0 24px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .panel { padding: clamp(22px, 5vw, 36px); border: 1px solid var(--line); border-radius: 14px; background: var(--paper); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px 15px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: var(--muted-strong); font-size: 11px; font-weight: 650; }
+    .required { color: var(--red); }
+    .field input, .field select, .field textarea { width: 100%; border: 1px solid var(--control-border); border-radius: 8px; padding: 10px 11px; color: var(--ink); background: var(--control-bg); font-size: 12px; }
+    .field textarea { min-height: 125px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #879df4; box-shadow: 0 0 0 3px #4263eb18; }
+    .field input::placeholder, .field textarea::placeholder { color: #a5adba; }
+    .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 21px; }
+    .form-note { color: #929cad; font-size: 10px; }
+    .submit { border: 0; border-radius: 7px; padding: 11px 17px; color: white; background: var(--blue); font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 8px #4263eb30; }
+    .submit:hover { background: #3454d1; }
+    .error { display: none; margin-bottom: 17px; padding: 12px 14px; border: 1px solid #f0c4c4; border-radius: 8px; color: var(--red); background: #fff5f5; font-size: 12px; line-height: 1.5; }
+    .success { display: none; padding: 12px 14px; border: 1px solid #c8ead7; border-radius: 8px; color: var(--green); background: var(--green-soft); font-size: 12px; line-height: 1.5; }
+    @media (max-width: 500px) {
+      .topbar { height: 62px; padding: 0 15px; }
+      main { padding-top: 28px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .form-footer { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">N</span> Naik</div>
+    <a class="dashboard-link" href="./index.html">Support desk</a>
+  </header>
+  <main>
+    <div class="eyebrow">Customer support</div>
+    <h1>Raise a Request</h1>
+    <p class="subtitle">Complete the form and our support team will review your request.</p>
+    <section class="panel">
+      <div class="error" id="form-error" role="alert"></div>
+      <div class="success" id="form-success" role="status"></div>
+      <form id="client-request-form">
+        <div class="form-grid">
+          <div class="field"><label for="client-name">Your name <span class="required">*</span></label><input id="client-name" name="name" required maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan"></div>
+          <div class="field"><label for="client-email">Email address <span class="required">*</span></label><input id="client-email" name="email" type="email" required maxlength="160" autocomplete="email" placeholder="you@company.com"></div>
+          <div class="field full"><label for="subject">What can we help with? <span class="required">*</span></label><input id="subject" name="subject" required maxlength="120" placeholder="A short summary of your issue"></div>
+          <div class="field"><label for="category">Request type</label><select id="category" name="category"><option>General question</option><option>Technical issue</option><option>Billing</option><option>Account access</option><option>Feature request</option><option>Other</option></select></div>
+          <div class="field"><label for="priority">How urgent is it?</label><select id="priority" name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+          <div class="field full"><label for="description">Details <span class="required">*</span></label><textarea id="description" name="description" required maxlength="3000" placeholder="Share any details that will help us understand your request..."></textarea></div>
+        </div>
+        <div class="form-footer"><span class="form-note">Fields marked * are required.</span><button class="submit" type="submit">Submit request&nbsp; →</button></div>
+      </form>
+    </section>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const STORAGE_KEY = "naik-support-tickets-v1";
+      const LEGACY_STORAGE_KEY = "relay-support-tickets-v1";
+      const form = document.getElementById("client-request-form");
+      const errorBox = document.getElementById("form-error");
+
+      function loadTickets() {
+        const stored = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (stored === null) return [];
+        const tickets = JSON.parse(stored);
+        if (!Array.isArray(tickets) || !tickets.every((ticket) =>
+          ticket && typeof ticket.id === "string" && typeof ticket.subject === "string"
+        )) throw new Error("Saved ticket data has an invalid format.");
+        return tickets.map((ticket) => ({
+          ...ticket,
+          id: ticket.id.replace(/^RLY-(\d+)$/, "SR-$1")
+        }));
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        errorBox.style.display = "none";
+        if (!form.reportValidity()) return;
+        try {
+          const tickets = loadTickets();
+          const newest = tickets.reduce((max, ticket) => {
+            const match = /^(?:SR|RLY)-(\d+)$/.exec(ticket.id);
+            return match ? Math.max(max, Number(match[1])) : max;
+          }, 1000);
+          const values = new FormData(form);
+          const ticket = {
+            id: `SR-${newest + 1}`,
+            name: String(values.get("name")).trim(),
+            email: String(values.get("email")).trim(),
+            subject: String(values.get("subject")).trim(),
+            category: String(values.get("category")),
+            description: String(values.get("description")).trim(),
+            priority: String(values.get("priority")),
+            status: "Open",
+            assignee: "",
+            assignmentGroup: "",
+            createdAt: new Date().toISOString()
+          };
+          tickets.unshift(ticket);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+          document.getElementById("form-success").textContent = `Request submitted. Ticket ${ticket.id} is being redirected to the support dashboard.`;
+          document.getElementById("form-success").style.display = "block";
+          form.querySelector("button[type=submit]").disabled = true;
+          window.setTimeout(() => {
+            window.location.assign(`./index.html?created=${encodeURIComponent(ticket.id)}`);
+          }, 700);
+        } catch (error) {
+          console.error("Could not submit the client request.", error);
+          errorBox.textContent = "Your request could not be saved. Please check browser storage settings and try again.";
+          errorBox.style.display = "block";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
